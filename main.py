@@ -509,7 +509,19 @@ async def main():
     logger.info(f"Scheduler started — daily briefing at {BRIEFING_HOUR:02d}:{BRIEFING_MINUTE:02d}")
     logger.info("Bot is running ✅")
 
-    await dp.start_polling(bot)
+    # GitHub Actions: stop after 210 seconds (3.5 min) to restart cleanly
+    import os
+    if os.environ.get("GITHUB_ACTIONS"):
+        logger.info("Running on GitHub Actions — will stop in 210 seconds")
+        await asyncio.sleep(0.1)
+        polling_task = asyncio.create_task(dp.start_polling(bot))
+        try:
+            await asyncio.wait_for(asyncio.shield(polling_task), timeout=210)
+        except asyncio.TimeoutError:
+            logger.info("Timeout reached — stopping bot for restart")
+            await bot.session.close()
+    else:
+        await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
