@@ -9,3 +9,5 @@ python-dotenv==1.0.1
 aiohttp==3.9.5
 pypdf>=4.0.0
 pytz
+pydantic==2.7.4
+pydantic-core==2.18.4
